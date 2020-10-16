@@ -29,10 +29,12 @@ void traced_process::traced_process(const char* path, char* const argv[])
 		bool first = true;
 		// Parent Process
 		int wstatus;
+		wait(&wstatus);
+
+		ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_EXITKILL);
 
 		while (true)
 		{
-			wait(&wstatus);
 
 			if (WIFSTOPPED(wstatus))
 			{
@@ -41,12 +43,24 @@ void traced_process::traced_process(const char* path, char* const argv[])
 				ptrace(PTRACE_SYSCALL, pid, 0, 0);
 				wait(&wstatus);
 				ptrace(PTRACE_GETREGS, pid, 0, &regs);
-				printf("System call number - %llu\n", regs.orig_rax);
+				fprintf(stderr, "System call number - %llu\n", regs.orig_rax);
 
 				ptrace(PTRACE_SYSCALL, pid, 0, 0);
 				wait(&wstatus);
 				ptrace(PTRACE_GETREGS, pid, 0, &regs);
-				printf("System call returned - %llu\n", regs.orig_rax);
+				fprintf(stderr, "System call returned - %llu\n", regs.orig_rax);
+			}
+
+			else if (WIFEXITED(wstatus))
+			{
+				fprintf(stderr, "Exited\n");
+				return;
+			}
+
+			else
+			{
+				fprintf(stderr, "Unknown status\n");
+				return;
 			}
 		}
 	}
