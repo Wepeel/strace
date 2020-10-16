@@ -1,0 +1,9 @@
+*.vcxproj*
+*.sln
+.vs/
+
+*.bat
+Makefile
+*.make
+intermediate/
+target/
