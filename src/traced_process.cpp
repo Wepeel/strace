@@ -70,7 +70,7 @@ void traced_process::traced_process(const char* path, char* const argv[])
 					ptrace(PTRACE_SYSCALL, pid, 0, 0);
 					wait(&wstatus);
 					ptrace(PTRACE_GETREGS, pid, 0, &regs);
-					fprintf(stderr, " = %llu\n", regs.orig_rax);
+					fprintf(stderr, " = %llu\n", regs.rax);
 				}
 
 				else
@@ -78,7 +78,7 @@ void traced_process::traced_process(const char* path, char* const argv[])
 					ptrace(PTRACE_SYSCALL, pid, 0, 0);
 					wait(&wstatus);
 					ptrace(PTRACE_GETREGS, pid, 0, &regs);
-					fprintf(stderr, "System call returned - %llu\n", regs.orig_rax);
+					fprintf(stderr, "System call returned - %llu\n", regs.rax);
 				}
 
 			}
