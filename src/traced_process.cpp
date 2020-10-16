@@ -43,7 +43,27 @@ void traced_process::traced_process(const char* path, char* const argv[])
 				ptrace(PTRACE_SYSCALL, pid, 0, 0);
 				wait(&wstatus);
 				ptrace(PTRACE_GETREGS, pid, 0, &regs);
-				fprintf(stderr, "System call number - %llu\n", regs.orig_rax);
+
+				switch(regs.orig_rax)
+				{
+					case 0: // Read
+						fprintf(stderr, "read(fd=%llu, buf=%llu, count=%llu)\n", 
+							regs.rdi, regs.rsi, regs.rdx);
+						break;
+					case 1: // Write
+						fprintf(stderr, "write(fd=%llu, buf=%llu, count=%llu)\n", 
+							regs.rdi, regs.rsi, regs.rdx);
+						break;
+					case 2: // Open
+						fprintf(stderr, "open(filename=%llu, flags=%llu, mode=%llu)\n", 
+							regs.rdi, regs.rsi, regs.rdx);
+						break;
+					case 3: // Close
+						fprintf(stderr, "close(fd=%llu)\n", regs.rdi);
+						break;
+					default:
+						fprintf(stderr, "System call number - %llu\n", regs.orig_rax);
+				}
 
 				ptrace(PTRACE_SYSCALL, pid, 0, 0);
 				wait(&wstatus);
