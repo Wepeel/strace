@@ -47,28 +47,40 @@ void traced_process::traced_process(const char* path, char* const argv[])
 				switch(regs.orig_rax)
 				{
 					case 0: // Read
-						fprintf(stderr, "read(fd=%llu, buf=%llu, count=%llu)\n", 
+						fprintf(stderr, "read(fd=%llu, buf=0x%llx, count=%llu)", 
 							regs.rdi, regs.rsi, regs.rdx);
 						break;
 					case 1: // Write
-						fprintf(stderr, "write(fd=%llu, buf=%llu, count=%llu)\n", 
+						fprintf(stderr, "write(fd=%llu, buf=0x%llx, count=%llu)", 
 							regs.rdi, regs.rsi, regs.rdx);
 						break;
 					case 2: // Open
-						fprintf(stderr, "open(filename=%llu, flags=%llu, mode=%llu)\n", 
+						fprintf(stderr, "open(filename=%llu, flags=%llu, mode=%llu)", 
 							regs.rdi, regs.rsi, regs.rdx);
 						break;
 					case 3: // Close
-						fprintf(stderr, "close(fd=%llu)\n", regs.rdi);
+						fprintf(stderr, "close(fd=%llu)", regs.rdi);
 						break;
 					default:
 						fprintf(stderr, "System call number - %llu\n", regs.orig_rax);
 				}
+				
+			if (0 <= regs.orig_rax && 3>= regs.orig_rax)
+			{
+				ptrace(PTRACE_SYSCALL, pid, 0, 0);
+				wait(&wstatus);
+				ptrace(PTRACE_GETREGS, pid, 0, &regs);
+				fprintf(stderr, " = %llu\n", regs.orig_rax);
+			}
 
+			else
+			{
 				ptrace(PTRACE_SYSCALL, pid, 0, 0);
 				wait(&wstatus);
 				ptrace(PTRACE_GETREGS, pid, 0, &regs);
 				fprintf(stderr, "System call returned - %llu\n", regs.orig_rax);
+			}
+
 			}
 
 			else if (WIFEXITED(wstatus))
