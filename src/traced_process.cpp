@@ -51,12 +51,12 @@ void traced_process::traced_process(const char* path, char* const argv[])
 						regs.rdi, regs.rsi, regs.rdx);
 					break;
 				case 1: // Write
-					fprintf(stderr, "write(fd=%llu, buf=0x%llx, count=%llu)",
-						regs.rdi, regs.rsi, regs.rdx);
+					fprintf(stderr, "write(fd=%llu, buf=%llx, count=%llu)",
+						regs.rdi, /*reinterpret_cast<const char *>*/(regs.rsi), regs.rdx);
 					break;
 				case 2: // Open
-					fprintf(stderr, "open(filename=%llu, flags=%llu, mode=%llu)",
-						regs.rdi, regs.rsi, regs.rdx);
+					fprintf(stderr, "open(filename=%s, flags=%llu, mode=%llu)",
+						(char const *)regs.rdi, regs.rsi, regs.rdx);
 					break;
 				case 3: // Close
 					fprintf(stderr, "close(fd=%llu)", regs.rdi);
