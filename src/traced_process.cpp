@@ -3,6 +3,29 @@
 #include <sys/user.h>
 #include <errno.h>
 
+void print_string(pid_t pid, unsigned long long addr, unsigned long long count)
+{
+	for (unsigned long long i = 0; i < count; i++)
+	{
+		char print = (char)ptrace(PTRACE_PEEKDATA, pid, reinterpret_cast<const char *>(addr) + i);
+
+		if (print == '\n')
+		{
+			fprintf(stderr, "\\n");
+		}
+
+		else if (print == '\t')
+		{
+			fprintf(stderr, "\\t");
+		}
+
+		else
+		{
+			fprintf(stderr, "%c", print);
+		}
+	}
+}
+
 void traced_process::traced_process(const char* path, char* const argv[])
 {
 	pid_t pid = fork();
@@ -51,8 +74,10 @@ void traced_process::traced_process(const char* path, char* const argv[])
 						regs.rdi, regs.rsi, regs.rdx);
 					break;
 				case 1: // Write
-					fprintf(stderr, "write(fd=%llu, buf=%llx, count=%llu)",
-						regs.rdi, /*reinterpret_cast<const char *>*/(regs.rsi), regs.rdx);
+					fprintf(stderr, "write(fd=%llu, buf=",
+											regs.rdi);
+					print_string(pid, regs.rsi, regs.rdx);
+					 fprintf(stderr,", count=%llu)", regs.rdx);
 					break;
 				case 2: // Open
 					fprintf(stderr, "open(filename=%s, flags=%llu, mode=%llu)",
