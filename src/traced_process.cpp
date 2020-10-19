@@ -103,7 +103,7 @@ void traced_process::traced_process(const char* path, char* const argv[])
 					ptrace(PTRACE_SYSCALL, pid, 0, 0);
 					wait(&wstatus);
 					ptrace(PTRACE_GETREGS, pid, 0, &regs);
-					fprintf(stderr, "System call returned - %llu\n", regs.rax);
+					fprintf(stderr, "System call returned - %llx\n", regs.rax);
 				}
 
 			}
